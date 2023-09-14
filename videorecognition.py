@@ -5,6 +5,9 @@ import os
 from io import BytesIO
 from shared import *
 
+# Run the video recognition by calling the method as in the format below
+# performVideoRecognition(rekognition, dynamodb, ddbTableName, collectionId, videoNameInS3Bucket)
+
 def getDynamoDBItem(dynamodb, ddbTableName, itemId):
 
     ddbGetItemResponse = dynamodb.get_item(
