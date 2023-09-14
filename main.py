@@ -37,3 +37,14 @@ tempFolder = 'm2tmp/'
 
 listTablesResponse = dynamodb.list_tables()
 display(listTablesResponse["TableNames"])
+
+# We will define a method to write metadata (id, name, url) of celebrity to DynamoDB
+def addCelebrityToDynamoDB(celebrityId, celebrityName, celebrityUrl):
+    ddbPutItemResponse = dynamodb.put_item(
+        Item={
+            'id': {'S': celebrityId},
+            'name': {'S': celebrityName},
+            'url': { 'S': celebrityUrl},
+        },
+        TableName=ddbTableName,
+    )
