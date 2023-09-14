@@ -20,12 +20,12 @@ s3 = boto3.client('s3')
 # We are providing sample images and videos in this bucket so
 # you do not have to manually download/upload test images and videos.
 # to change
-bucketName = "aws-rek-immersionday-" + awsRegion
+bucketName = "hackathon-lbc-celebrity-faces"
 
 # DynamoDB Table and Rekognition Collection names. We will be creating these in this module.
 # to change
-ddbTableName = "my-celebrities" 
-collectionId = "my-celebrities"
+ddbTableName = "hackathon-celebrity-faces" 
+collectionId = "celebrity_id"
 
 # Create temporary directory
 # This directory is not needed to call Rekognition APIs.
