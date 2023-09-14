@@ -1,31 +1,24 @@
-# initialise Notebook
-import boto3
-from IPython.display import HTML, display, Image as IImage
-import time
-import os
-from io import BytesIO
-# import webbrowser
+from shared import *
 
 # Get current region to choose correct bucket
-mySession = boto3.session.Session()
-awsRegion = mySession.region_name
+awsRegion = getAwsRegion()
 
 # Initialize clients
-rekognition = boto3.client('rekognition')
-dynamodb = boto3.client('dynamodb')
-s3 = boto3.client('s3')
+rekognition = getRekogClient()
+dynamodb = getDynamoClient()
+s3 = getS3Client()
 
 # S3 bucket that contains sample images and videos
 
 # We are providing sample images and videos in this bucket so
 # you do not have to manually download/upload test images and videos.
 # to change
-bucketName = "hackathon-lbc-celebrity-faces"
+bucketName = getBucketName()
 
 # DynamoDB Table and Rekognition Collection names. We will be creating these in this module.
 # to change
-ddbTableName = "hackathon-celebrity-faces" 
-collectionId = "celebrity_id"
+ddbTableName = getDynamoTableName()
+collectionId = getCollectionId()
 
 # Create temporary directory
 # This directory is not needed to call Rekognition APIs.
@@ -63,6 +56,7 @@ def indexFace (bucketName, imageName, celebrityId):
 def addCelebrityToDynamoDB(celebrityId, celebrityName, celebrityUrl):
     ddbPutItemResponse = dynamodb.put_item(
         Item={
+            'celebrity_id': {'S': str(uuid.uuid4())},
             'id': {'S': celebrityId},
             'name': {'S': celebrityName},
             'url': { 'S': celebrityUrl},
@@ -70,19 +64,22 @@ def addCelebrityToDynamoDB(celebrityId, celebrityName, celebrityUrl):
         TableName=ddbTableName,
     )
 
+# this inserts into the dynamo db
+# addCelebrityToDynamoDB("4", "Andrew Marr", "https://hackathon-lbc-celebrity-faces.s3.amazonaws.com/Andrew+Marr.png")
+
 def getDynamoDBItem(itemId):
     ddbGetItemResponse = dynamodb.get_item(
         Key={'celebrity_id': {'S': itemId} },
         TableName=ddbTableName
     )
-    
+
     itemToReturn = ('', '', '')
-    
+
     if('Item' in ddbGetItemResponse):
-        itemToReturn = (ddbGetItemResponse['Item']['id']['S'], 
+        itemToReturn = (ddbGetItemResponse['Item']['id']['S'],
                 ddbGetItemResponse['Item']['name']['S'],
                 ddbGetItemResponse['Item']['url']['S'])
-    
+
     return itemToReturn
 
 # uncomment this and run it to create the collections, then use the below lines to ensure they have been created successfully
@@ -135,12 +132,12 @@ getFaceSearch = rekognition.get_face_search(
 while(getFaceSearch['JobStatus'] == 'IN_PROGRESS'):
     time.sleep(5)
     print('.', end='')
- 
+
     getFaceSearch = rekognition.get_face_search(
     JobId=faceSearchJobId,
     SortBy='TIMESTAMP'
 )
-    
+
 # display(getFaceSearch['JobStatus'])
 
 # display(getFaceSearch)
