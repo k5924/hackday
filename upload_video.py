@@ -2,6 +2,8 @@ import urllib.request
 import boto3
 import urllib.request
 from botocore.exceptions import NoCredentialsError
+from shared import *
+from videorecognition import *
 
 
 def download_video_from_url():
@@ -34,6 +36,8 @@ def upload_video_to_s3(bucket_name='hackathon-lbc-videos'):
         s3.put_object(Bucket=bucket_name, Key=s3_file_name, Body=video_data)
 
         print(f"Upload completed to {bucket_name}/{s3_file_name}!")
+
+        performVideoRecognition(getRekogClient(), getDynamoClient(), getDynamoTableName(), getCollectionId(), s3_file_name)
     except urllib.error.HTTPError as err:
         print(f"Failed to fetch the video from URL. HTTP Error: {err.code}")
     except NoCredentialsError:
