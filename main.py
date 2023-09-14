@@ -1,7 +1,6 @@
 # initialise Notebook
 import boto3
 from IPython.display import HTML, display, Image as IImage
-from PIL import Image, ImageDraw, ImageFont
 import time
 import os
 from io import BytesIO
@@ -31,5 +30,10 @@ collectionId = "celebrity_id"
 # This directory is not needed to call Rekognition APIs.
 # We will only use this directory to download images from S3 bucket and draw bounding boxes
 # to change
-!mkdir m2tmp
 tempFolder = 'm2tmp/'
+
+# List existing DynamoDB Tables
+# Before creating DynamoDB table, let us first look at the list of existing DynamoDB tables in our account.
+
+listTablesResponse = dynamodb.list_tables()
+display(listTablesResponse["TableNames"])
