@@ -21,35 +21,7 @@ def getDynamoDBItem(dynamodb, ddbTableName, itemId):
     
     return itemToReturn
 
-# uncomment this and run it to create the collections, then use the below lines to ensure they have been created successfully
-# createCollectionResponse = rekognition.create_collection(
-#     CollectionId=collectionId
-# )
-# display(createCollectionResponse)
-
-# List Rekognition Collections
-# Let us make sure that Recognition we just created now appears in the list of collections in our AWS account.
-# listCollectionsResponse = rekognition.list_collections()
-
-# display(listCollectionsResponse["CollectionIds"])
-# display(listCollectionsResponse["FaceModelVersions"])
-
-# # describeCollectionResponse = rekognition.describe_collection(
-# #     CollectionId=collectionId
-# # )
-# # display(describeCollectionResponse)
-
-# describeCollectionResponse = rekognition.describe_collection(
-#     CollectionId=collectionId
-# )
-# display("FaceCount: {0}".format(describeCollectionResponse["FaceCount"]))
-
-# indexFace(bucketName, "James O'Brien.jpg", "e6669e13-dc7c-44d3-9a22-f7eb7e81d49d")
-
 def performVideoRecognition(rekognition, dynamodb, ddbTableName: str, collectionId: str, videoName: str):
-
-    # enter video name here
-    # videoName = "Andrew Castle questions how 'achieving' Net-Zero will impact our living standards.mp4"
 
     startFaceSearchResponse = rekognition.start_face_search(
         Video={
@@ -84,6 +56,10 @@ def performVideoRecognition(rekognition, dynamodb, ddbTableName: str, collection
 
     # display(getFaceSearch)
 
+    f = open("test.json", "a")
+    f.write(str(getFaceSearch))
+    f.close()
+
     theCelebs = {}
 
     # Display timestamps and celebrites detected at that time
@@ -100,21 +76,20 @@ def performVideoRecognition(rekognition, dynamodb, ddbTableName: str, collection
                 eid =  fm["Face"]["ExternalImageId"]
                 if(eid not in theFaceMatches):
                     theFaceMatches[eid] = (eid, ts, round(conf,2))
-                if(eid not in theCelebs):
+                if((eid not in theCelebs) and (conf >= 90)):
                     theCelebs[eid] = (getDynamoDBItem(dynamodb, ddbTableName, eid))
             for theFaceMatch in theFaceMatches:
                 celeb = theCelebs[theFaceMatch]
                 fminfo = theFaceMatches[theFaceMatch]
                 strDetail = strDetail + "At {0} ms<br> {2} (ID:{1}) Conf: {4}%<br>".format(fminfo[1],
                         celeb[0], celeb[1], celeb[2], fminfo[2])
-
+    
     printedCelebs = []
 
     # Unique faces detected in video
     for theCeleb in theCelebs:
         tc = theCelebs[theCeleb]
-        # strOverall = strOverall + "{1} (ID: {0})<br>".format(tc[0], tc[1], tc[2])
-        if ((tc[1] != " " or "") and (tc[1] not in printedCelebs)):
+        if (tc[1] and (tc[1] not in printedCelebs)):
             print("Celebrity: {1} with Id: {0}".format(tc[0], tc[1]))
         printedCelebs.append(tc[1])
 
