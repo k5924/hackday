@@ -23,7 +23,7 @@ def getDynamoClient():
 
 def getS3Client():
     s3 = boto3.client('s3')
-    return s3;
+    return s3
 
 # S3 bucket that contains sample images and videos
 
@@ -36,9 +36,9 @@ def getBucketName():
 # DynamoDB Table and Rekognition Collection names. We will be creating these in this module.
 # to change
 def getDynamoTableName():
-    ddbTableName = "hackathon-celebrity-faces" 
+    return "hackathon-celebrity-faces" 
 
 def getCollectionId():
-    collectionId = "celebrity_id"
+    return "celebrity_id"
 
 

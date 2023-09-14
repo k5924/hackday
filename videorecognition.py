@@ -3,8 +3,10 @@ from IPython.display import HTML, display, Image as IImage
 import time
 import os
 from io import BytesIO
+from shared import *
 
-def getDynamoDBItem(itemId):
+def getDynamoDBItem(dynamodb, ddbTableName, itemId):
+
     ddbGetItemResponse = dynamodb.get_item(
         Key={'celebrity_id': {'S': itemId} },
         TableName=ddbTableName
@@ -44,69 +46,77 @@ def getDynamoDBItem(itemId):
 
 # indexFace(bucketName, "James O'Brien.jpg", "e6669e13-dc7c-44d3-9a22-f7eb7e81d49d")
 
-videoName = "Andrew Castle questions how 'achieving' Net-Zero will impact our living standards.mp4"
+def performVideoRecognition(rekognition, dynamodb, ddbTableName: str, collectionId: str, videoName: str):
 
-startFaceSearchResponse = rekognition.start_face_search(
-    Video={
-        'S3Object': {
-            'Bucket': "hackathon-lbc-videos",
-            'Name': videoName
-        }
-    },
-    FaceMatchThreshold=90,
-    CollectionId=collectionId,
-)
+    # enter video name here
+    # videoName = "Andrew Castle questions how 'achieving' Net-Zero will impact our living standards.mp4"
+
+    startFaceSearchResponse = rekognition.start_face_search(
+        Video={
+            'S3Object': {
+                'Bucket': "hackathon-lbc-videos",
+                'Name': videoName
+            }
+        },
+        FaceMatchThreshold=90,
+        CollectionId=collectionId,
+    )
 
 
-faceSearchJobId = startFaceSearchResponse['JobId']
-display("Job ID: {0}".format(faceSearchJobId))
+    faceSearchJobId = startFaceSearchResponse['JobId']
+    display("Job ID: {0}".format(faceSearchJobId))
 
-getFaceSearch = rekognition.get_face_search(
-    JobId=faceSearchJobId,
-    SortBy='TIMESTAMP'
-)
-
-while(getFaceSearch['JobStatus'] == 'IN_PROGRESS'):
-    time.sleep(5)
-    print('.', end='')
- 
     getFaceSearch = rekognition.get_face_search(
-    JobId=faceSearchJobId,
-    SortBy='TIMESTAMP'
-)
+        JobId=faceSearchJobId,
+        SortBy='TIMESTAMP'
+    )
+
+    while(getFaceSearch['JobStatus'] == 'IN_PROGRESS'):
+        time.sleep(5)
+        print('.', end='')
     
-# display(getFaceSearch['JobStatus'])
+        getFaceSearch = rekognition.get_face_search(
+        JobId=faceSearchJobId,
+        SortBy='TIMESTAMP'
+    )
+        
+    # display(getFaceSearch['JobStatus'])
 
-# display(getFaceSearch)
+    # display(getFaceSearch)
 
-theCelebs = {}
+    theCelebs = {}
 
-# Display timestamps and celebrites detected at that time
-strDetail = "Celebrites detected in vidoe<br>=======================================<br>"
-strOverall = "Celebrities in the overall video:<br>=======================================<br>"
+    # Display timestamps and celebrites detected at that time
+    strDetail = "Celebrites detected in vidoe<br>=======================================<br>"
+    strOverall = "Celebrities in the overall video:<br>=======================================<br>"
 
-# Faces detected in each frame
-for person in getFaceSearch['Persons']:
-    if('FaceMatches' in person and len(person["FaceMatches"])> 0):
-        ts = person["Timestamp"]
-        theFaceMatches = {}
-        for fm in person["FaceMatches"]:
-            conf = fm["Similarity"]
-            eid =  fm["Face"]["ExternalImageId"]
-            if(eid not in theFaceMatches):
-                theFaceMatches[eid] = (eid, ts, round(conf,2))
-            if(eid not in theCelebs):
-                theCelebs[eid] = (getDynamoDBItem(eid))
-        for theFaceMatch in theFaceMatches:
-            celeb = theCelebs[theFaceMatch]
-            fminfo = theFaceMatches[theFaceMatch]
-            strDetail = strDetail + "At {0} ms<br> {2} (ID:{1}) Conf: {4}%<br>".format(fminfo[1],
-                       celeb[0], celeb[1], celeb[2], fminfo[2])
+    # Faces detected in each frame
+    for person in getFaceSearch['Persons']:
+        if('FaceMatches' in person and len(person["FaceMatches"])> 0):
+            ts = person["Timestamp"]
+            theFaceMatches = {}
+            for fm in person["FaceMatches"]:
+                conf = fm["Similarity"]
+                eid =  fm["Face"]["ExternalImageId"]
+                if(eid not in theFaceMatches):
+                    theFaceMatches[eid] = (eid, ts, round(conf,2))
+                if(eid not in theCelebs):
+                    theCelebs[eid] = (getDynamoDBItem(dynamodb, ddbTableName, eid))
+            for theFaceMatch in theFaceMatches:
+                celeb = theCelebs[theFaceMatch]
+                fminfo = theFaceMatches[theFaceMatch]
+                strDetail = strDetail + "At {0} ms<br> {2} (ID:{1}) Conf: {4}%<br>".format(fminfo[1],
+                        celeb[0], celeb[1], celeb[2], fminfo[2])
 
-# Unique faces detected in video
-for theCeleb in theCelebs:
-    tc = theCelebs[theCeleb]
-    strOverall = strOverall + "{1} (ID: {0})<br>".format(tc[0], tc[1], tc[2])
+    printedCelebs = []
 
-# Display results
-print(strOverall)
+    # Unique faces detected in video
+    for theCeleb in theCelebs:
+        tc = theCelebs[theCeleb]
+        # strOverall = strOverall + "{1} (ID: {0})<br>".format(tc[0], tc[1], tc[2])
+        if ((tc[1] != " " or "") and (tc[1] not in printedCelebs)):
+            print("Celebrity: {1} with Id: {0}".format(tc[0], tc[1]))
+        printedCelebs.append(tc[1])
+
+    # Display results
+    # print(strOverall)
