@@ -27,7 +27,7 @@ def parseResponse(response):
     for obj in response['Labels']:
         label = obj['Label']['Name']
         confidence = obj['Label']['Confidence']
-        if (float(confidence) > 90) and confidence not in labelSet:
+        if (float(confidence) > 90):
             labelSet.add(label)
     return labelSet
 
@@ -41,5 +41,10 @@ def blockUntilJobIsFinished(job):
 def makeRequestForLabels(videoNameInS3Bucket):
     tryToDetectLabels = detectLabels(videoNameInS3Bucket)
     finishedJob = blockUntilJobIsFinished(tryToDetectLabels)
-    labelsSet = parseResponse(finishedJob)
-    print(labelsSet)
+    if (finishedJob['JobStatus'] != "FAILED"):
+        result = parseResponse(finishedJob)
+        print(result)
+    else:
+        print("Failed because {}".format(finishedJob['StatusMessage']))
+
+makeRequestForLabels("Andrew Castle questions how 'achieving' Net-Zero will impact our living standards.mp4")
