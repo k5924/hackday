@@ -45,7 +45,7 @@ def performVideoRecognition(rekognition, dynamodb, ddbTableName: str, collection
 
     while(getFaceSearch['JobStatus'] == 'IN_PROGRESS'):
         time.sleep(5)
-        print('.', end='')
+        # print('.', end='')
     
         getFaceSearch = rekognition.get_face_search(
         JobId=faceSearchJobId,
@@ -76,6 +76,7 @@ def performVideoRecognition(rekognition, dynamodb, ddbTableName: str, collection
                 eid =  fm["Face"]["ExternalImageId"]
                 if(eid not in theFaceMatches):
                     theFaceMatches[eid] = (eid, ts, round(conf,2))
+                # A match with a confidence less than 90% will be removed
                 if((eid not in theCelebs) and (conf >= 90)):
                     theCelebs[eid] = (getDynamoDBItem(dynamodb, ddbTableName, eid))
             for theFaceMatch in theFaceMatches:
