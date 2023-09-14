@@ -4,7 +4,6 @@ import time
 from IPython.display import display
 import json
 
-
 def transcribe_audio_in_video(bucket_name, file):
 
     s3 = boto3.client('s3')
@@ -40,6 +39,12 @@ def transcribe_audio_in_video(bucket_name, file):
 
     print(output_transcript)
     s3.put_object(Bucket=bucket_name, Key=filename, Body=output_transcript)
+    run_sentiment(output_transcript)
+
+def run_sentiment(text):
+    comprehend=boto3.client('comprehend')
+    response = comprehend.detect_sentiment(Text=text, LanguageCode='en')
+    print(json.dumps(response, sort_keys=True, indent=4))
 
 
 if __name__ == "__main__":

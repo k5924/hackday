@@ -3,7 +3,7 @@ from shared import *
 client = getRekogClient()
 
 def detectLabels(videoNameInS3Bucket):
-    print("detecing labels")
+    # print("detecing labels")
     response = client.start_label_detection(
             Video= {
                 'S3Object': {
@@ -16,7 +16,7 @@ def detectLabels(videoNameInS3Bucket):
 
 
 def getLabels(request):
-    print("getting labels")
+    # print("getting labels")
     result = client.get_label_detection(
             JobId = request['JobId']
             )
@@ -46,5 +46,3 @@ def makeRequestForLabels(videoNameInS3Bucket):
         print(result)
     else:
         print("Failed because {}".format(finishedJob['StatusMessage']))
-
-makeRequestForLabels("Andrew Castle questions how 'achieving' Net-Zero will impact our living standards.mp4")

@@ -4,7 +4,8 @@ import urllib.request
 from botocore.exceptions import NoCredentialsError
 from shared import *
 from videorecognition import *
-
+from video_transcript import *
+from labels import *
 
 def download_video_from_url():
     url = input("Enter the Youtube-url\n")
@@ -37,6 +38,13 @@ def upload_video_to_s3(bucket_name='hackathon-lbc-videos'):
 
         print(f"Upload completed to {bucket_name}/{s3_file_name}!")
 
+        print("Transcribing...")
+        transcribe_audio_in_video(bucket_name, s3_file_name)
+
+        print("Video Recognition for labels...")
+        makeRequestForLabels(s3_file_name)
+
+        print("Video Recognition for faces...")
         performVideoRecognition(getRekogClient(), getDynamoClient(), getDynamoTableName(), getCollectionId(), s3_file_name)
     except urllib.error.HTTPError as err:
         print(f"Failed to fetch the video from URL. HTTP Error: {err.code}")
