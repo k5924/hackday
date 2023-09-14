@@ -71,4 +71,5 @@ def addCelebrityToDynamoDB(celebrityId, celebrityName, celebrityUrl):
         TableName=ddbTableName,
     )
 
-addCelebrityToDynamoDB("4", "Andrew Marr", "https://hackathon-lbc-celebrity-faces.s3.amazonaws.com/Andrew+Marr.png")
+# this inserts into the dynamo db
+# addCelebrityToDynamoDB("4", "Andrew Marr", "https://hackathon-lbc-celebrity-faces.s3.amazonaws.com/Andrew+Marr.png")
