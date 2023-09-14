@@ -37,3 +37,34 @@ tempFolder = 'm2tmp/'
 
 listTablesResponse = dynamodb.list_tables()
 display(listTablesResponse["TableNames"])
+
+def indexFace (bucketName, imageName, celebrityId):
+
+    indexFaceResponse = rekognition.index_faces(
+        CollectionId=collectionId,
+        Image={
+            'S3Object': {
+                'Bucket': bucketName,
+                'Name': imageName,
+            }
+        },
+        ExternalImageId=celebrityId,
+        DetectionAttributes=[
+            'DEFAULT' #'DEFAULT'|'ALL',
+        ],
+        MaxFaces=1,
+        QualityFilter='AUTO' #NONE | AUTO | LOW | MEDIUM | HIGH
+    )
+    
+    display(indexFaceResponse)
+
+# We will define a method to write metadata (id, name, url) of celebrity to DynamoDB
+def addCelebrityToDynamoDB(celebrityId, celebrityName, celebrityUrl):
+    ddbPutItemResponse = dynamodb.put_item(
+        Item={
+            'id': {'S': celebrityId},
+            'name': {'S': celebrityName},
+            'url': { 'S': celebrityUrl},
+        },
+        TableName=ddbTableName,
+    )
