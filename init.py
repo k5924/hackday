@@ -14,7 +14,7 @@ s3 = getS3Client()
 # We are providing sample images and videos in this bucket so
 # you do not have to manually download/upload test images and videos.
 # to change
-bucketName = getBucketName()
+bucketName = getImageBucketName()
 
 # DynamoDB Table and Rekognition Collection names. We will be creating these in this module.
 # to change
