@@ -4,6 +4,7 @@ from IPython.display import HTML, display, Image as IImage
 import time
 import os
 from io import BytesIO
+import uuid
 
 # Get current region to choose correct bucket
 mySession = boto3.session.Session()
@@ -62,9 +63,13 @@ def indexFace (bucketName, imageName, celebrityId):
 def addCelebrityToDynamoDB(celebrityId, celebrityName, celebrityUrl):
     ddbPutItemResponse = dynamodb.put_item(
         Item={
+            'celebrity_id': {'S': str(uuid.uuid4())},
             'id': {'S': celebrityId},
             'name': {'S': celebrityName},
             'url': { 'S': celebrityUrl},
         },
         TableName=ddbTableName,
     )
+
+# this inserts into the dynamo db
+# addCelebrityToDynamoDB("4", "Andrew Marr", "https://hackathon-lbc-celebrity-faces.s3.amazonaws.com/Andrew+Marr.png")
