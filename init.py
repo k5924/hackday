@@ -1,4 +1,5 @@
 from shared import *
+from videorecognition import *
 
 # Get current region to choose correct bucket
 awsRegion = getAwsRegion()
@@ -17,7 +18,7 @@ bucketName = getImageBucketName()
 
 # DynamoDB Table and Rekognition Collection names. We will be creating these in this module.
 # to change
-ddbTableName = getDynamoTableName() 
+ddbTableName = getDynamoTableName()
 collectionId = getCollectionId()
 
 # Create temporary directory
@@ -66,3 +67,5 @@ def addCelebrityToDynamoDB(celebrityId, celebrityName, celebrityUrl):
 
 # this inserts into the dynamo db
 # addCelebrityToDynamoDB("4", "Andrew Marr", "https://hackathon-lbc-celebrity-faces.s3.amazonaws.com/Andrew+Marr.png")
+
+performVideoRecognition(rekognition, dynamodb, ddbTableName, collectionId, "Caller discusses rising costs of groceries with James O'Brien.mp4")
